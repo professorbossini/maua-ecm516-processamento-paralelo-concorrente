@@ -12,13 +12,20 @@ public class Produtor implements Runnable{
     }
     @Override
     public void run(){
-        System.out.println ("Produtor: " + Thread.currentThread().getName());
+        //System.out.println ("Produtor: " + Thread.currentThread().getName());
         while (true){
             synchronized (itens){
-                //espera ocupada
-                while (itens.size() >= maximo); //NO-OP
+               while (itens.size() >= maximo){
+                    try {
+                        itens.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 int item = gerador.nextInt(6) + 1;
+                System.out.printf ("Item produzido(%s): %d\n", Thread.currentThread().getName(), item);
                 itens.add(item);
+                itens.notifyAll();
             }
             try {
                 Thread.sleep(3000);

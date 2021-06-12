@@ -11,16 +11,20 @@ public class Consumidor implements Runnable{
 
     @Override
     public void run() {
-        System.out.println ("Consumidor: " + Thread.currentThread().getName());
+        //System.out.println ("Consumidor: " + Thread.currentThread().getName());
         while (true){
             synchronized (itens){
-                //espera ocupada
-                while (itens.isEmpty());//NO-OP
-                int item = itens.get(0);
-                System.out.println("Consumido: " + item);
-                total += item;
-                System.out.println ("Total: " + total);
+                while (itens.isEmpty()){
+                    try {
+                        itens.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                total += itens.get(0);
                 itens.remove(0);
+                System.out.printf("Total(%s): %d\n", Thread.currentThread().getName(), total);
+                itens.notifyAll();
             }
             try {
                 Thread.sleep(3000);
